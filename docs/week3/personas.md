@@ -35,7 +35,6 @@ It's enrollment week. Dona just got her request slip from the registrar for a sc
 
 ## Teresa, the staff member
 
-"When I just say 'next,' nobody knows who I mean, so everyone looks at each other." *(observation)*
 
 | | |
 | --- | --- |
