@@ -2,6 +2,38 @@
 {% block title %}Ticket #{{ ticket.number }} · CashierQ{% endblock %}
 
 {% block content %}
-<h1 class="h3">Your ticket: #{{ ticket.number }}</h1>
-<p>The full My place page comes in Part 6.</p>
+{% set badge = {'waiting': 'warning', 'called': 'success', 'served': 'secondary', 'no-show': 'danger'} %}
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-5">
+    <div class="card text-center shadow-sm">
+      <div class="card-body p-4">
+        <h1 class="h6 text-body-secondary mb-0">Your ticket</h1>
+        <p class="display-1 fw-bold my-2">#{{ ticket.number }}</p>
+        <p class="mb-3"><span class="text-body-secondary">Service:</span> {{ service.name }}</p>
+
+        <div id="live-status" aria-live="polite">
+          <p class="mb-2">
+            <span id="status-badge" class="badge fs-6 text-bg-{{ badge[ticket.status] }}">{{ ticket.status|capitalize }}</span>
+          </p>
+          <p id="ahead-text" class="lead mb-0">
+            {% if ticket.status == 'waiting' %}
+              {% if ahead == 0 %}You're next!
+              {% elif ahead == 1 %}1 person ahead of you
+              {% else %}{{ ahead }} people ahead of you{% endif %}
+            {% elif ticket.status == 'called' %}Please go to the cashier now.
+            {% elif ticket.status == 'served' %}Done. Thank you!
+            {% else %}This ticket is no longer in the queue.{% endif %}
+          </p>
+        </div>
+
+        {% if ticket.status in ('waiting', 'called') %}
+        <form method="post" action="{{ url_for('leave', ticket_id=ticket.number) }}" class="mt-4"
+              onsubmit="return confirm('Leave the queue? You will lose your place.');">
+          <button type="submit" class="btn btn-outline-danger btn-sm">Leave the queue</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

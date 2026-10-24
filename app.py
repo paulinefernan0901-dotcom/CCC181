@@ -23,6 +23,10 @@ TICKETS = [
 ]
 
 
+def find_ticket(ticket_id):
+    return next((t for t in TICKETS if t["number"] == ticket_id), None)
+
+
 @app.get("/")
 def index():
     return render_template("index.html")
@@ -63,13 +67,29 @@ def join():
     return redirect(url_for("ticket", ticket_id=number))
 
 
-# Temporary version: Part 6 turns this into the full "My place" page
 @app.get("/queue/<int:ticket_id>")
 def ticket(ticket_id):
-    t = next((t for t in TICKETS if t["number"] == ticket_id), None)
+    t = find_ticket(ticket_id)
     if t is None:
         abort(404)
-    return render_template("ticket.html", ticket=t)
+    # Count only people still waiting ahead of this ticket for the same service
+    ahead = [x for x in TICKETS
+             if x["service_id"] == t["service_id"]
+             and x["status"] == "waiting"
+             and x["number"] < t["number"]]
+    service = next(s for s in SERVICES if s["id"] == t["service_id"])
+    return render_template("ticket.html", ticket=t, service=service, ahead=len(ahead))
+
+
+@app.post("/queue/<int:ticket_id>/leave")
+def leave(ticket_id):
+    t = find_ticket(ticket_id)
+    if t is None:
+        abort(404)
+    if t["status"] in ("waiting", "called"):
+        t["status"] = "no-show"
+        flash(f"Ticket #{ticket_id} left the queue.", "info")
+    return redirect(url_for("index"))
 
 
 @app.get("/staff")
