@@ -5,3 +5,7 @@ CashierQ is a queue system for a school cashier office, where students waiting t
 ## How to run
 
 To run it, create a virtual environment (`python -m venv .venv`), activate it (`.venv\Scripts\activate`), install the packages (`pip install -r requirements.txt`), and then start the app with `flask --app app run --debug`.
+
+
+
+**Note:** The staff dashboard has no login yet. Anyone who opens `/staff` can use it. Staff login comes in a later week.
