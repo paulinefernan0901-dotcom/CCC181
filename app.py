@@ -72,14 +72,12 @@ def ticket(ticket_id):
     t = find_ticket(ticket_id)
     if t is None:
         abort(404)
-    # Count only people still waiting ahead of this ticket for the same service
+    # Count everyone still waiting ahead of this ticket, whatever their service
     ahead = [x for x in TICKETS
-             if x["service_id"] == t["service_id"]
-             and x["status"] == "waiting"
+             if x["status"] == "waiting"
              and x["number"] < t["number"]]
     service = next(s for s in SERVICES if s["id"] == t["service_id"])
     return render_template("ticket.html", ticket=t, service=service, ahead=len(ahead))
-
 
 @app.post("/queue/<int:ticket_id>/leave")
 def leave(ticket_id):
@@ -94,4 +92,38 @@ def leave(ticket_id):
 
 @app.get("/staff")
 def staff_dashboard():
-    return "Staff dashboard coming soon"
+    service_id = request.args.get("service_id", type=int)
+    queue = [t for t in TICKETS if t["status"] in ("waiting", "called")]
+    if service_id:
+        queue = [t for t in queue if t["service_id"] == service_id]
+    names = {s["id"]: s["name"] for s in SERVICES}
+    waiting_counts = {s["id"]: sum(1 for t in TICKETS
+                                   if t["service_id"] == s["id"] and t["status"] == "waiting")
+                      for s in SERVICES}
+    return render_template("staff.html", queue=queue, services=SERVICES, names=names,
+                           selected=service_id, waiting_counts=waiting_counts)
+
+
+@app.post("/staff/call-next")
+def call_next():
+    service_id = request.form.get("service_id", type=int)
+    waiting = [t for t in TICKETS
+               if t["status"] == "waiting" and (not service_id or t["service_id"] == service_id)]
+    if waiting:
+        waiting[0]["status"] = "called"
+        flash(f"Ticket #{waiting[0]['number']} called.", "info")
+    else:
+        flash("No one is waiting.", "info")
+    return redirect(url_for("staff_dashboard", service_id=service_id))
+
+
+@app.post("/staff/tickets/<int:ticket_id>/<action>")
+def staff_action(ticket_id, action):
+    # Actions that change data use POST, never a plain link
+    new_status = {"call": "called", "serve": "served", "no-show": "no-show"}.get(action)
+    t = find_ticket(ticket_id)
+    if t is None or new_status is None:
+        abort(404)
+    t["status"] = new_status
+    flash(f"Ticket #{ticket_id} marked {new_status}.", "info")
+    return redirect(url_for("staff_dashboard"))

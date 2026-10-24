@@ -12,6 +12,7 @@
         <p class="mb-3"><span class="text-body-secondary">Service:</span> {{ service.name }}</p>
 
         <div id="live-status" aria-live="polite">
+          <p class="mb-1 small text-body-secondary">Status:</p>
           <p class="mb-2">
             <span id="status-badge" class="badge fs-6 text-bg-{{ badge[ticket.status] }}">{{ ticket.status|capitalize }}</span>
           </p>
@@ -24,12 +25,13 @@
             {% elif ticket.status == 'served' %}Done. Thank you!
             {% else %}This ticket is no longer in the queue.{% endif %}
           </p>
+          <p class="small text-body-secondary mt-1 mb-0">Updates automatically</p>
         </div>
 
         {% if ticket.status in ('waiting', 'called') %}
         <form method="post" action="{{ url_for('leave', ticket_id=ticket.number) }}" class="mt-4"
               onsubmit="return confirm('Leave the queue? You will lose your place.');">
-          <button type="submit" class="btn btn-outline-danger btn-sm">Leave the queue</button>
+          <button type="submit" class="btn btn-danger btn-sm">Leave the queue</button>
         </form>
         {% endif %}
       </div>

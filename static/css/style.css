@@ -78,3 +78,10 @@ footer {
 }
 
 .error { color: var(--orange); font-weight: 600; }
+
+
+/* Staff table: columns size to fit on phones, equal widths from tablet up */
+.staff-table { width: 100%; }
+@media (min-width: 768px) {
+  .staff-table { table-layout: fixed; }
+}
