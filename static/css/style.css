@@ -85,3 +85,9 @@ footer {
 @media (min-width: 768px) {
   .staff-table { table-layout: fixed; }
 }
+
+/* Touch targets: buttons at least 44px tall on every screen */
+.btn { min-height: 44px; }
+
+/* Keep button labels on one line in the staff table */
+.staff-table .btn { white-space: nowrap; }
