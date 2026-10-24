@@ -1,14 +1,10 @@
 {% extends "base.html" %}
+{% block title %}CashierQ{% endblock %}
 
 {% block content %}
-  <p>Hello, {{ name }}!</p>
-
-  <h2>Tickets in the queue</h2>
-  <ul class="tickets">
-    {% for t in tickets %}
-      <li><a href="{{ url_for('ticket', ticket_id=t.number) }}">#{{ t.number }}</a></li>
-    {% else %}
-      <li>The queue is empty.</li>
-    {% endfor %}
-  </ul>
+<div class="text-center py-5">
+  <h1 class="display-5 fw-bold">CashierQ</h1>
+  <p class="lead mb-4">Get a queue number for the cashier and check your turn from your phone, so you don't have to stand in line.</p>
+ <a class="btn btn-success btn-lg" href="{{ url_for('join_form') }}">Join the queue</a>
+</div>
 {% endblock %}
