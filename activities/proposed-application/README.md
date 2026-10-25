@@ -11,17 +11,13 @@
 
 ## 1. Problem Statement
 
-
 Students who need to pay at the cashier, especially during enrollment week, has to wait in long, crowded lines with no way of knowing when it will be their turn. This causes the office to be crowded and wastes time that students need for other enrollment steps.
 
 ### 1.1 Background
 
-
 This problem happens in the cashier office as payment process has to be through that office. As for who experiences it, it applies to everyone who needs to undergo payments inside the school campus but I observed that the problem surges during enrollment week. This is because students would request documents in the registrar needed for enrollment and have to pay the cashier the amount needed for the request before the registrar would process it. I personally did come across this problem as I requested some documents for my scholarship during enrollment week and the line/queue was long when I had to go to the cashier office for the payment process.
 
-
 ### 1.2 Evidence from research
-
 
 | Method | Who / where | Key finding |
 |---|---|---|
@@ -56,17 +52,15 @@ Students who need to pay at the cashier, especially during enrollment week, need
 
 ### 2.1 Primary persona
 
-> Every detail should trace back to your research. Label the persona as fictional if it combines several real people.
-
 | | |
 |---|---|
-| **Name, age** | [Dona, 21] |
-| **Role / background** | [3rd-year student, College of Science and Mathematics] |
-| **Goals** | [Pay for her requested documents quickly so the registrar can process them before her enrollment deadlines] |
-| **Frustrations / pain points** | [Because it was enrollment week, the cashier was busy accommodating other students, leading to a long line. She had to wait longer than she anticipated.] |
-| **Context of use** | [Uses a smartphone on campus Wi-Fi or mobile data; mostly during enrollment week, between classes or while visiting the registrar and cashier offices] |
-| **Accessibility considerations** | [Needs large, readable queue numbers and simple text; the system should work on low bandwidth since campus connectivity can be unreliable] |
-| **Current workaround** | [Arrives early and stands in line, or leaves and returns later hoping the line is shorter, risking a missed turn and a delayed registrar request] |
+| **Name, age** | Dona, 21 |
+| **Role / background** | 3rd-year student, College of Science and Mathematics |
+| **Goals** | Pay for her requested documents quickly so the registrar can process them before her scholarship and enrollemt |
+| **Frustrations / pain points** | Because it was enrollment week, the cashier was busy accommodating other students, leading to a long line. She had to wait longer than she anticipated. |
+| **Context of use** | Uses a smartphone on campus Wi-Fi or mobile data; mostly during enrollment week, between classes or while visiting the registrar and cashier offices |
+| **Accessibility considerations** | Needs large, readable queue numbers and simple text; the system should work on low bandwidth since campus connectivity can be unreliable |
+| **Current workaround** | Arrives early and stands in line, or leaves and returns later hoping the line is shorter, risking a missed turn and a delayed registrar request |
 
 ### 2.2 User groups and stakeholders
 
@@ -77,9 +71,6 @@ Students who need to pay at the cashier, especially during enrollment week, need
 | Stakeholders | School administration| Approve and fund the system, maintain it, and are affected by crowding, processing times, and how smoothly enrollment runs throughout the week, or in cases where the cashier will be crowded by students for several payment reasons. |
 
 ### 2.3 Organizational needs
-
-> What does the organization that would own or run the app need? Think about mission, policies and compliance (e.g., Data Privacy Act of 2012, RA 10173), budget, existing systems and reporting.
-
 
 - **Data privacy:** Follow RA 10173 by collecting only what the queue needs (such as a student ID, email and the purpose of the process) and deleting the records aquired after a set time period.
 - **Low cost and easy upkeep:** The system should be cheap to run and simple for cashier staff to use.
@@ -96,16 +87,6 @@ The CashierQ would be a queue app for the school cashier office. There will be i
 ### 3.2 Value proposition
 
 For **students who pay at the school cashier office** who **need to know when their turn will come without standing in a long line**, **VCashierQ** is a **queue web app** that **gives them a ticket number and shows how many people are ahead of them on their phone**. Unlike **the current line, where students just stay and wait**, it **tells them when they are called and lets the cashier call the next number with one click**.
-
-> [Your value proposition]
-
-### 3.3 Value Proposition Canvas
-
-### 3.3 Value Proposition Canvas
-
-| User side | Product side |
-|---|---|
-### 3.3 Value Proposition Canvas
 
 | User side | Product side |
 |---|---|
@@ -154,8 +135,6 @@ For **students who pay at the school cashier office** who **need to know when th
 
 ### 4.2 Non-functional requirements
 
-> Make each one measurable: "fast" is not a requirement; "updates within 5 seconds" is.
-
 | ID | Category | Requirement |
 |---|---|---|
 | NFR-01 | Performance | A student's ticket status and position update within 10 seconds of a cashier action, without reloading the page. Each page loads in under 3 seconds on a mobile connection. |
@@ -173,8 +152,6 @@ For **students who pay at the school cashier office** who **need to know when th
 ---
 
 ## 5. Minimum Viable Product (MVP)
-
-> The smallest version of the app that still solves the core problem for your primary persona. It is the scope you commit to finishing this semester.
 
 ### 5.1 MVP features
 
