@@ -80,10 +80,15 @@ footer {
 .error { color: var(--orange); font-weight: 600; }
 
 
-/* Staff table: columns size to fit on phones, equal widths from tablet up */
-.staff-table { width: 100%; }
-@media (min-width: 768px) {
-  .staff-table { table-layout: fixed; }
+/* Staff table: five equal-width columns on every screen size */
+.staff-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+/* Narrow "No." column; the other four share the rest equally */
+.staff-table th:first-child {
+  width: 8%;
 }
 
 /* Touch targets: buttons at least 44px tall on every screen */
@@ -91,3 +96,32 @@ footer {
 
 /* Keep button labels on one line in the staff table */
 .staff-table .btn { white-space: nowrap; }
+
+/* Status dot: small circle shown before the status word */
+.status-dot {
+  display: inline-block;
+  width: 0.75rem;
+  height: 0.75rem;
+  margin-right: 0.5rem;
+  vertical-align: -1px;
+}
+
+/* Phone: smaller text and padding so all five columns fit with no sideways scroll */
+@media (max-width: 575.98px) {
+  .staff-table th,
+  .staff-table td {
+    padding: 0.5rem 0.15rem;
+    font-size: 0.7rem;
+    overflow-wrap: anywhere;
+  }
+  .staff-table .btn {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.15rem;
+    width: 100%;
+  }
+  .staff-table .status-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    margin-right: 0.2rem;
+  }
+}

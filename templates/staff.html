@@ -2,42 +2,35 @@
 {% block title %}Staff dashboard · CashierQ{% endblock %}
 
 {% block content %}
-{% set badge = {'waiting': 'warning', 'called': 'success'} %}
-<h1 class="h3 mb-3">Staff dashboard</h1>
+<h1 class="h2 mb-3">Staff dashboard</h1>
 
-{# Waiting count per service (the ★ feature for my setting) #}
-<div class="row g-2 mb-3">
+<div class="d-flex flex-wrap gap-2 mb-3">
   {% for s in services %}
-  <div class="col-12 col-md-4">
-    <div class="border rounded px-3 py-2 text-center">{{ s.name }}: {{ waiting_counts[s.id] }} waiting</div>
-  </div>
+    <div class="flex-fill border rounded px-3 py-2 text-center">{{ s.name }}: {{ waiting_counts[s.id] }} waiting</div>
   {% endfor %}
 </div>
 
-{# Service filter #}
-<form method="get" action="{{ url_for('staff_dashboard') }}" class="row g-2 align-items-end mb-3">
-  <div class="col-12 col-md-6">
-    <label for="service_id" class="form-label">Filter by service</label>
-    <select id="service_id" name="service_id" class="form-select">
+<form method="get" action="{{ url_for('staff_dashboard') }}" class="mb-3">
+  <label for="filter-service" class="form-label">Filter by service</label>
+  <div class="d-flex align-items-end gap-2 col-12 col-md-6">
+    <select id="filter-service" name="service_id" class="form-select">
       <option value="">All services</option>
       {% for s in services %}
-      <option value="{{ s.id }}" {% if selected == s.id %}selected{% endif %}>{{ s.name }}</option>
+        <option value="{{ s.id }}" {% if selected == s.id %}selected{% endif %}>{{ s.name }}</option>
       {% endfor %}
     </select>
-  </div>
-  <div class="col-12 col-md-auto">
-    <button type="submit" class="btn btn-success w-100">Apply</button>
+    <button type="submit" class="btn btn-success">Apply</button>
   </div>
 </form>
 
-{# Call next: the action the cashier uses most, so it sits above the table #}
-<form method="post" action="{{ url_for('call_next') }}" class="mb-4">
-  <input type="hidden" name="service_id" value="{{ selected or '' }}">
+<form method="post" action="{{ url_for('call_next') }}" class="mb-3">
+  {% if selected %}<input type="hidden" name="service_id" value="{{ selected }}">{% endif %}
   <button type="submit" class="btn btn-success btn-lg w-100">Call next number</button>
 </form>
 
+{% if queue %}
 <div class="table-responsive">
-      <table class="table table-sm align-middle text-center staff-table">
+  <table class="table staff-table text-center align-middle" style="--bs-table-bg: #fff;">
     <caption>Tickets that are waiting or being served, in order</caption>
     <thead>
       <tr>
@@ -50,33 +43,35 @@
     </thead>
     <tbody>
       {% for t in queue %}
-      <tr>
+      <tr class="{% if t.status == 'called' %}table-success{% endif %}">
         <th scope="row">#{{ t.number }}</th>
         <td>{{ t.name }}</td>
-        <td><span class="badge text-bg-{{ badge[t.status] }}">{{ t.status|capitalize }}</span></td>
+        <td class="text-nowrap">
+          <span class="status-dot rounded-circle {% if t.status == 'called' %}bg-success{% else %}bg-warning{% endif %}"
+                aria-hidden="true"></span>{{ t.status|capitalize }}
+        </td>
         <td>{{ names[t.service_id] }}</td>
         <td>
-                    {% if t.status == 'called' %}
-          <div class="d-flex flex-column flex-md-row flex-wrap align-items-center justify-content-center gap-2">
-            <form method="post" action="{{ url_for('staff_action', ticket_id=t.number, action='serve') }}">
-              <button type="submit" class="btn btn-sm btn-success"
-                      aria-label="Mark ticket {{ t.number }} as served">Done</button>
+          {% if t.status == 'called' %}
+          <div class="d-flex flex-column flex-md-row justify-content-center gap-2">
+            <form method="post" action="/staff/tickets/{{ t.number }}/serve">
+              <button type="submit" class="btn btn-success" aria-label="Mark ticket {{ t.number }} as done">Done</button>
             </form>
-            <form method="post" action="{{ url_for('staff_action', ticket_id=t.number, action='no-show') }}">
-              <button type="submit" class="btn btn-sm btn-outline-danger"
-                      aria-label="Mark ticket {{ t.number }} as no-show">No-show</button>
+            <form method="post" action="/staff/tickets/{{ t.number }}/no-show"
+                  onsubmit="return confirm('Mark ticket #{{ t.number }} as no-show?');">
+              <button type="submit" class="btn btn-outline-danger" aria-label="Mark ticket {{ t.number }} as no-show">No-show</button>
             </form>
           </div>
+          {% else %}
+          <span class="text-body-secondary">None</span>
           {% endif %}
-          
         </td>
-      </tr>
-      {% else %}
-      <tr>
-        <td colspan="5" class="text-center text-body-secondary py-4">No one is waiting right now.</td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
 </div>
+{% else %}
+<div class="alert alert-secondary">No one is waiting right now.</div>
+{% endif %}
 {% endblock %}
