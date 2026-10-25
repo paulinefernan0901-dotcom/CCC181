@@ -8,7 +8,7 @@
 - **Student ID:** 2024-0037
 - **Section:** CS3B
 - **Date:** October 25, 2026
-- **Pull request:** [link to your PR]
+- **Pull request:**
 
 ## 2. Personas
 
@@ -59,7 +59,15 @@ On the Join screen, the service names didn't match across my wireframes, so I ma
 
 ## 6. Accessibility
 
-Lighthouse accessibility scores: Join [100/100], My place [100/100], Staff [100/100]. Full results are in [accessibility.md](accessibility.md).
+Lighthouse accessibility scores: 
+
+Join 100/100
+
+My place 100/100
+
+Staff 100/100
+
+Full results are in [accessibility.md](accessibility.md).
 
 The most important fix was making every button at least 44 px tall, because Leave the queue, Done, No-show and Apply were too small to tap easily on a phone. I also stopped the "No-show" label from splitting onto two lines when the UI is changed into a phone version.
 
@@ -88,4 +96,4 @@ In Task 3 the tester paused for a few seconds because the colored "Waiting" and 
 
 ## 9. Declaration
 
-I used Claude (an AI assistant) to help clarity and correct grammar of my proposal and report, to check my requirement IDs, and ask help with the codes when it doesn't run properly. The code, wireframes and usability test are my own.
+I used Claude to improve clarity and correct grammar of my proposal and report, to check my requirement IDs, and ask help with the codes when it doesn't run properly. The code, wireframes and usability test are my own.
