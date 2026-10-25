@@ -5,17 +5,17 @@
 | **Student name** | Fernan, Pauline |
 | **Section** | CS3B |
 | **GitHub username** | paulinefernan0901-dotcom |
-| **Date submitted** | 2026-10-23
+| **Date submitted** | 2026-10-25
 
 ---
 
 ## 1. Problem Statement
 
-Students who need to pay at the cashier, especially during enrollment week, has to wait in long, crowded lines with no way of knowing when it will be their turn. This causes the office to be crowded and wastes time that students need for other enrollment steps.
+Students who need to pay at the cashier, especially during enrollment week, has to wait in long, crowded lines with no way of knowing when it will be their turn. This causes the office to be crowded, stand on long lines and lose time on other things they are supposed to do.
 
 ### 1.1 Background
 
-This problem happens in the cashier office as payment process has to be through that office. As for who experiences it, it applies to everyone who needs to undergo payments inside the school campus but I observed that the problem surges during enrollment week. This is because students would request documents in the registrar needed for enrollment and have to pay the cashier the amount needed for the request before the registrar would process it. I personally did come across this problem as I requested some documents for my scholarship during enrollment week and the line/queue was long when I had to go to the cashier office for the payment process.
+This problem happens in the cashier office as payment process has to be through that office. As for who experiences it, it applies to everyone who needs to undergo payments inside the school campus but I observed that the problem surges during enrollment week. This is because students would request documents in the registrar needed for scholarship,enrollment or other important instance where they have to submit student documents and have to pay the cashier the amount needed for the request before the registrar would process it. I personally did come across this problem as I requested some documents for my scholarship during enrollment week and the line/queue was long when I had to go to the cashier office for the payment process.
 
 ### 1.2 Evidence from research
 
