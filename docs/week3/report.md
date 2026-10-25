@@ -8,7 +8,7 @@
 - **Student ID:** 2024-0037
 - **Section:** CS3B
 - **Date:** October 25, 2026
-- **Pull request:**
+- **Pull request:** https://github.com/paulinefernan0901-dotcom/CCC181/pull/2
 
 ## 2. Personas
 
