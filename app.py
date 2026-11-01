@@ -2,7 +2,7 @@
 from flask import Flask, abort, flash, redirect, render_template, request, url_for
 
 app = Flask(__name__)
-app.secret_key = "dev-only-change-me"  # Week 11 moves this into an environment variable
+app.secret_key = "dev-only-change-me" 
 
 
 SERVICES = [
@@ -45,7 +45,6 @@ def join():
     email = form.get("email", "").strip().lower()
     service_id = form.get("service_id", type=int)
 
-    # Never trust form input: the server checks every field, even if the browser already did
     errors = {}
     if not name:
         errors["name"] = "Enter your name."
