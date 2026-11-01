@@ -44,7 +44,7 @@
     <tbody>
       {% for t in queue %}
       <tr class="{% if t.status == 'called' %}table-success{% endif %}">
-        <th scope="row">#{{ t.number }}</th>
+        <th scope="row">#{{ t.id }}</th>
         <td>{{ t.name }}</td>
         <td class="text-nowrap">
           <span class="status-dot rounded-circle {% if t.status == 'called' %}bg-success{% else %}bg-warning{% endif %}"
@@ -54,12 +54,12 @@
         <td>
           {% if t.status == 'called' %}
           <div class="d-flex flex-column flex-md-row justify-content-center gap-2">
-            <form method="post" action="/staff/tickets/{{ t.number }}/serve">
-              <button type="submit" class="btn btn-success" aria-label="Mark ticket {{ t.number }} as done">Done</button>
+            <form method="post" action="/staff/tickets/{{ t.id }}/serve">
+              <button type="submit" class="btn btn-success" aria-label="Mark ticket {{ t.id }} as done">Done</button>
             </form>
-            <form method="post" action="/staff/tickets/{{ t.number }}/no-show"
-                  onsubmit="return confirm('Mark ticket #{{ t.number }} as no-show?');">
-              <button type="submit" class="btn btn-outline-danger" aria-label="Mark ticket {{ t.number }} as no-show">No-show</button>
+            <form method="post" action="/staff/tickets/{{ t.id }}/no-show"
+                  onsubmit="return confirm('Mark ticket #{{ t.id }} as no-show?');">
+              <button type="submit" class="btn btn-outline-danger" aria-label="Mark ticket {{ t.id }} as no-show">No-show</button>
             </form>
           </div>
           {% else %}

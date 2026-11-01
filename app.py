@@ -20,28 +20,6 @@ db.init_app(app)
 migrate = Migrate(app, db)
 
 
-SERVICES = [
-    {"id": 1, "name": "Registrar document fees"},
-    {"id": 2, "name": "Tuition and other fees"},
-    {"id": 3, "name": "Other payments"},
-]
-
-# Each ticket: number, name, student_id, email, service_id, status
-# status is one of: waiting, called, served, no-show
-TICKETS = [
-    {"number": 1, "name": "Luna", "student_id": "2024-0001", "email": "luna@school.edu",
-     "service_id": 1, "status": "waiting"},
-    {"number": 2, "name": "Lina", "student_id": "2024-0002", "email": "lina@school.edu",
-     "service_id": 2, "status": "waiting"},
-    {"number": 3, "name": "Nona", "student_id": "2024-0003", "email": "nona@school.edu",
-     "service_id": 1, "status": "waiting"},
-]
-
-
-def find_ticket(ticket_id):
-    return next((t for t in TICKETS if t["number"] == ticket_id), None)
-
-
 @app.get("/")
 def index():
     return render_template("index.html")
@@ -98,6 +76,10 @@ def join():
     flash("You joined the queue.", "success")
     return redirect(url_for("ticket", ticket_id=ticket.id))
 
+
+# PARTS 8 AND 9 replace every route below. They still use the deleted
+# SERVICES and TICKETS lists, so they will show an error until then.
+# That is expected at this point in the activity.
 
 @app.get("/queue/<int:ticket_id>")
 def ticket(ticket_id):
