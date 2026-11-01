@@ -5,8 +5,9 @@ import os
 
 from dotenv import load_dotenv
 from flask_migrate import Migrate
+from sqlalchemy.exc import IntegrityError
 
-from models import Service, db
+from models import Service, Ticket, User, db
 
 load_dotenv()
 
@@ -46,9 +47,14 @@ def index():
     return render_template("index.html")
 
 
+def active_services():
+    stmt = db.select(Service).filter_by(is_active=True).order_by(Service.id)
+    return db.session.scalars(stmt).all()
+
+
 @app.get("/join")
 def join_form():
-    return render_template("join.html", services=SERVICES, form={}, errors={})
+    return render_template("join.html", services=active_services(), form={}, errors={})
 
 
 @app.post("/join")
@@ -58,26 +64,39 @@ def join():
     student_id = form.get("student_id", "").strip()
     email = form.get("email", "").strip().lower()
     service_id = form.get("service_id", type=int)
+    service = db.session.get(Service, service_id) if service_id else None
 
     errors = {}
-    if not name:
+    if not name or len(name) > 100:
         errors["name"] = "Enter your name."
-    if len(student_id) < 4:
+    if len(student_id) < 4 or len(student_id) > 20:
         errors["student_id"] = "Enter your student ID."
-    if "@" not in email:
+    if "@" not in email or len(email) > 120:
         errors["email"] = "Enter a valid email address."
-    if service_id not in [s["id"] for s in SERVICES]:
+    if service is None or not service.is_active:
         errors["service_id"] = "Choose what you need at the cashier."
 
     if errors:
         flash("Please fix the highlighted fields.", "danger")
-        return render_template("join.html", services=SERVICES, form=form, errors=errors), 400
+        return render_template("join.html", services=active_services(), form=form, errors=errors), 400
 
-    number = max((t["number"] for t in TICKETS), default=0) + 1
-    TICKETS.append({"number": number, "name": name, "student_id": student_id,
-                    "email": email, "service_id": service_id, "status": "waiting"})
+    user = db.session.scalar(db.select(User).filter_by(student_id=student_id))
+    if user is None:
+        user = User(name=name, student_id=student_id, email=email)
+    else:
+        user.name = name
+        user.email = email
+    ticket = Ticket(user=user, service=service)
+    db.session.add(ticket)
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        flash("You already have an active ticket for that service.", "danger")
+        return render_template("join.html", services=active_services(), form=form, errors={}), 409
+
     flash("You joined the queue.", "success")
-    return redirect(url_for("ticket", ticket_id=number))
+    return redirect(url_for("ticket", ticket_id=ticket.id))
 
 
 @app.get("/queue/<int:ticket_id>")

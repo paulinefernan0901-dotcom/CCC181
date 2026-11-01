@@ -39,7 +39,7 @@
         <select id="service_id" name="service_id" required
                 class="form-select {% if errors.service_id %}is-invalid{% endif %}"
                 {% if errors.service_id %}aria-describedby="service_id-error"{% endif %}>
-          <option value="">Choose a service…</option>
+          <option value="" disabled selected hidden>Choose what you need</option>
           {% for s in services %}
             <option value="{{ s.id }}"
               {% if form.get('service_id') == s.id|string %}selected{% endif %}>{{ s.name }}</option>
