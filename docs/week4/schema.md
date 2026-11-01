@@ -37,7 +37,8 @@
 | tickets | status | varchar(20) | NOT NULL DEFAULT 'waiting', CHECK (status IN ('waiting', 'called', 'served', 'no-show', 'left')) | Only these five statuses are allowed |
 | tickets | created_at | timestamptz | NOT NULL DEFAULT now() | Time zone safe; set by the database |
 | tickets | called_at | timestamptz | *(none; empty until called)* | Only has a value once the cashier calls the ticket |
-
+| tickets | user_id, service_id | *no type* | UNIQUE index on (user_id, service_id) WHERE status IN ('waiting', 'called') | A student can't hold two active tickets for the same service, but can still join a different service |
+| tickets | status, called_at | *no type* | CHECK ((status IN ('called', 'served', 'no-show')) = (called_at IS NOT NULL)) | `called_at` is filled in exactly when the ticket has been called |
 
 ### 2d. Relationships
 
