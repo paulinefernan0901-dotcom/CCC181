@@ -30,14 +30,27 @@ def local_time(value):
     return value.astimezone(PH_TIME).strftime("%b %d, %I:%M %p") if value else ""
 
 
-@app.get("/")
-def index():
-    return render_template("index.html")
+def all_services():
+    return db.session.scalars(db.select(Service).order_by(Service.id)).all()
 
 
 def active_services():
     stmt = db.select(Service).filter_by(is_active=True).order_by(Service.id)
     return db.session.scalars(stmt).all()
+
+
+def people_ahead(t):
+    """Count tickets still waiting that joined before t (one shared line)."""
+    stmt = (db.select(func.count())
+            .select_from(Ticket)
+            .where(Ticket.status == "waiting",
+                   Ticket.created_at < t.created_at))
+    return db.session.scalar(stmt)
+
+
+@app.get("/")
+def index():
+    return render_template("index.html")
 
 
 @app.get("/join")
@@ -87,15 +100,6 @@ def join():
     return redirect(url_for("ticket", ticket_id=ticket.id))
 
 
-def people_ahead(t):
-    """Count tickets still waiting that joined before t (one shared line)."""
-    stmt = (db.select(func.count())
-            .select_from(Ticket)
-            .where(Ticket.status == "waiting",
-                   Ticket.created_at < t.created_at))
-    return db.session.scalar(stmt)
-
-
 @app.get("/queue/<int:ticket_id>")
 def ticket(ticket_id):
     t = db.get_or_404(Ticket, ticket_id)
@@ -111,12 +115,15 @@ def ticket_status(ticket_id):
 
 @app.post("/queue/<int:ticket_id>/leave")
 def leave(ticket_id):
-    t = find_ticket(ticket_id)
-    if t is None:
-        abort(404)
-    if t["status"] in ("waiting", "called"):
-        t["status"] = "no-show"
+    t = db.get_or_404(Ticket, ticket_id)
+    # Soft delete: the row stays for reports. Only a waiting ticket can leave,
+    # because your schema requires called_at on every called ticket.
+    if t.status == "waiting":
+        t.status = "left"
+        db.session.commit()
         flash(f"Ticket #{ticket_id} left the queue.", "info")
+    else:
+        flash("Only a waiting ticket can leave the queue.", "danger")
     return redirect(url_for("index"))
 
 
@@ -128,48 +135,72 @@ def staff_dashboard():
             .order_by(Ticket.created_at))
     if service_id:
         stmt = stmt.where(Ticket.service_id == service_id)
-    tickets = db.session.scalars(stmt).all()
+    queue = db.session.scalars(stmt).all()
 
-    # Shape each ticket the way staff.html expects
-    queue = [{"id": t.id,
-              "name": t.user.name,
-              "status": t.status,
-              "service_id": t.service_id,
-              "created_at": t.created_at} for t in tickets]
-
-    all_services = db.session.scalars(db.select(Service).order_by(Service.id)).all()
-    names = {s.id: s.name for s in all_services}
+    services = all_services()
     counts = dict(db.session.execute(
         db.select(Ticket.service_id, func.count())
           .where(Ticket.status == "waiting")
           .group_by(Ticket.service_id)).all())
-    waiting_counts = {s.id: counts.get(s.id, 0) for s in all_services}
+    waiting_counts = {s.id: counts.get(s.id, 0) for s in services}
 
-    return render_template("staff.html", queue=queue, services=all_services, names=names,
+    return render_template("staff.html", queue=queue, services=services,
                            selected=service_id, waiting_counts=waiting_counts)
 
 
 @app.post("/staff/call-next")
 def call_next():
     service_id = request.form.get("service_id", type=int)
-    waiting = [t for t in TICKETS
-               if t["status"] == "waiting" and (not service_id or t["service_id"] == service_id)]
-    if waiting:
-        waiting[0]["status"] = "called"
-        flash(f"Ticket #{waiting[0]['number']} called.", "info")
-    else:
+    stmt = (db.select(Ticket)
+            .filter_by(status="waiting")
+            .order_by(Ticket.created_at))
+    if service_id:
+        stmt = stmt.where(Ticket.service_id == service_id)
+    t = db.session.scalar(stmt.limit(1))
+    if t is None:
         flash("No one is waiting.", "info")
+    else:
+        t.status = "called"
+        t.called_at = func.now()  # the database fills in the time
+        db.session.commit()
+        flash(f"Ticket #{t.id} called.", "info")
     return redirect(url_for("staff_dashboard", service_id=service_id))
+
+
+TRANSITIONS = {"call": ("waiting", "called"),
+               "serve": ("called", "served"),
+               "no-show": ("called", "no-show")}
+
+
+@app.post("/staff/tickets/<int:ticket_id>/delete")
+def delete_ticket(ticket_id):
+    t = db.get_or_404(Ticket, ticket_id)
+    db.session.delete(t)  # hard delete: the row is gone for good
+    db.session.commit()
+    flash(f"Ticket #{ticket_id} was deleted.", "warning")
+    return redirect(url_for("staff_dashboard"))
 
 
 @app.post("/staff/tickets/<int:ticket_id>/<action>")
 def staff_action(ticket_id, action):
     # Actions that change data use POST, never a plain link
-    new_status = {"call": "called", "serve": "served", "no-show": "no-show"}.get(action)
-    t = find_ticket(ticket_id)
-    if t is None or new_status is None:
+    rule = TRANSITIONS.get(action)
+    if rule is None:
         abort(404)
-    t["status"] = new_status
+    required, new_status = rule
+    t = db.get_or_404(Ticket, ticket_id)
+    if t.status != required:
+        flash(f"Ticket #{ticket_id} is {t.status}, so it can't be marked {new_status}.", "danger")
+        return redirect(url_for("staff_dashboard"))
+    t.status = new_status
+    if new_status == "called":
+        t.called_at = func.now()  # the database fills in the time
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        flash("The database refused that change.", "danger")
+        return redirect(url_for("staff_dashboard"))
     flash(f"Ticket #{ticket_id} marked {new_status}.", "info")
     return redirect(url_for("staff_dashboard"))
 

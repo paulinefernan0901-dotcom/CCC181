@@ -46,27 +46,30 @@
       {% for t in queue %}
       <tr class="{% if t.status == 'called' %}table-success{% endif %}">
         <th scope="row">#{{ t.id }}</th>
-        <td>{{ t.name }}</td>
+        <td>{{ t.user.name }}</td>
         <td class="text-nowrap">
           <span class="status-dot rounded-circle {% if t.status == 'called' %}bg-success{% else %}bg-warning{% endif %}"
                 aria-hidden="true"></span>{{ t.status|capitalize }}
         </td>
-        <td>{{ names[t.service_id] }}</td>
-        <td>{{ t.created_at|local }}</td>
+        <td>{{ t.service.name }}</td>
+        <td class="text-nowrap">{{ t.created_at|local }}</td>
         <td>
-          {% if t.status == 'called' %}
-          <div class="d-flex flex-column flex-md-row justify-content-center gap-2">
+          <div class="d-flex flex-wrap justify-content-center gap-2">
+            {% if t.status == 'called' %}
             <form method="post" action="/staff/tickets/{{ t.id }}/serve">
-              <button type="submit" class="btn btn-success" aria-label="Mark ticket {{ t.id }} as done">Done</button>
+              <button type="submit" class="btn btn-success btn-sm" aria-label="Mark ticket {{ t.id }} as done">Done</button>
             </form>
             <form method="post" action="/staff/tickets/{{ t.id }}/no-show"
                   onsubmit="return confirm('Mark ticket #{{ t.id }} as no-show?');">
-              <button type="submit" class="btn btn-outline-danger" aria-label="Mark ticket {{ t.id }} as no-show">No-show</button>
+              <button type="submit" class="btn btn-outline-danger btn-sm" aria-label="Mark ticket {{ t.id }} as no-show">No-show</button>
             </form>
+            {% else %}
+            <form method="post" action="/staff/tickets/{{ t.id }}/delete"
+                  onsubmit="return confirm('Delete ticket #{{ t.id }}? This cannot be undone.');">
+              <button type="submit" class="btn btn-outline-secondary btn-sm" aria-label="Delete ticket {{ t.id }}">Delete</button>
+            </form>
+            {% endif %}
           </div>
-          {% else %}
-          <span class="text-body-secondary">None</span>
-          {% endif %}
         </td>
       </tr>
       {% endfor %}
