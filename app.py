@@ -6,6 +6,7 @@ import os
 from dotenv import load_dotenv
 from flask_migrate import Migrate
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import func
 
 from models import Service, Ticket, User, db
 
@@ -76,32 +77,25 @@ def join():
     flash("You joined the queue.", "success")
     return redirect(url_for("ticket", ticket_id=ticket.id))
 
+def people_ahead(t):
+    """Count tickets still waiting that joined before t (one shared line)."""
+    stmt = (db.select(func.count())
+            .select_from(Ticket)
+            .where(Ticket.status == "waiting",
+                   Ticket.created_at < t.created_at))
+    return db.session.scalar(stmt)
 
-# PARTS 8 AND 9 replace every route below. They still use the deleted
-# SERVICES and TICKETS lists, so they will show an error until then.
-# That is expected at this point in the activity.
 
 @app.get("/queue/<int:ticket_id>")
 def ticket(ticket_id):
-    t = find_ticket(ticket_id)
-    if t is None:
-        abort(404)
-    # Count everyone still waiting ahead of this ticket, whatever their service
-    ahead = [x for x in TICKETS
-             if x["status"] == "waiting"
-             and x["number"] < t["number"]]
-    service = next(s for s in SERVICES if s["id"] == t["service_id"])
-    return render_template("ticket.html", ticket=t, service=service, ahead=len(ahead))
+    t = db.get_or_404(Ticket, ticket_id)
+    return render_template("ticket.html", ticket=t, service=t.service,
+                           ahead=people_ahead(t))
 
 @app.get("/queue/<int:ticket_id>/status.json")
 def ticket_status(ticket_id):
-    t = find_ticket(ticket_id)
-    if t is None:
-        abort(404)
-    # Same shared-line rule as the ticket route, so the two numbers always agree
-    ahead = sum(1 for x in TICKETS
-                if x["status"] == "waiting" and x["number"] < t["number"])
-    return {"status": t["status"], "ahead": ahead}
+    t = db.get_or_404(Ticket, ticket_id)
+    return {"status": t.status, "ahead": people_ahead(t)}
 
 @app.post("/queue/<int:ticket_id>/leave")
 def leave(ticket_id):
@@ -117,14 +111,28 @@ def leave(ticket_id):
 @app.get("/staff")
 def staff_dashboard():
     service_id = request.args.get("service_id", type=int)
-    queue = [t for t in TICKETS if t["status"] in ("waiting", "called")]
+    stmt = (db.select(Ticket)
+            .where(Ticket.status.in_(["waiting", "called"]))
+            .order_by(Ticket.created_at))
     if service_id:
-        queue = [t for t in queue if t["service_id"] == service_id]
-    names = {s["id"]: s["name"] for s in SERVICES}
-    waiting_counts = {s["id"]: sum(1 for t in TICKETS
-                                   if t["service_id"] == s["id"] and t["status"] == "waiting")
-                      for s in SERVICES}
-    return render_template("staff.html", queue=queue, services=SERVICES, names=names,
+        stmt = stmt.where(Ticket.service_id == service_id)
+    tickets = db.session.scalars(stmt).all()
+
+    # Shape each ticket the way staff.html expects (id, name, status, service_id)
+    queue = [{"id": t.id,
+              "name": t.user.name,
+              "status": t.status,
+              "service_id": t.service_id} for t in tickets]
+
+    all_services = db.session.scalars(db.select(Service).order_by(Service.id)).all()
+    names = {s.id: s.name for s in all_services}
+    counts = dict(db.session.execute(
+        db.select(Ticket.service_id, func.count())
+          .where(Ticket.status == "waiting")
+          .group_by(Ticket.service_id)).all())
+    waiting_counts = {s.id: counts.get(s.id, 0) for s in all_services}
+
+    return render_template("staff.html", queue=queue, services=all_services, names=names,
                            selected=service_id, waiting_counts=waiting_counts)
 
 
