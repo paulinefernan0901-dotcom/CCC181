@@ -1,8 +1,22 @@
 """CashierQ: a queue system for the school cashier office."""
 from flask import Flask, abort, flash, redirect, render_template, request, url_for
 
+import os
+
+from dotenv import load_dotenv
+from flask_migrate import Migrate
+
+from models import Service, db
+
+load_dotenv()
+
 app = Flask(__name__)
 app.secret_key = "dev-only-change-me" 
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DATABASE_URL"]
+app.config["SQLALCHEMY_ECHO"] = os.environ.get("SQLALCHEMY_ECHO") == "1"
+
+db.init_app(app)
+migrate = Migrate(app, db)
 
 
 SERVICES = [
@@ -136,3 +150,14 @@ def staff_action(ticket_id, action):
     t["status"] = new_status
     flash(f"Ticket #{ticket_id} marked {new_status}.", "info")
     return redirect(url_for("staff_dashboard"))
+
+@app.cli.command("seed")
+def seed():
+    """Add the starting services if they are not there yet."""
+    starting = ["Registrar document fees", "Tuition and other fees", "Other payments"]
+    for name in starting:
+        exists = db.session.scalar(db.select(Service).filter_by(name=name))
+        if exists is None:
+            db.session.add(Service(name=name))
+    db.session.commit()
+    print("Services are ready.")
