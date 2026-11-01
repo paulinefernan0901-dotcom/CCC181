@@ -2,6 +2,7 @@
 from flask import Flask, abort, flash, redirect, render_template, request, url_for
 
 import os
+from datetime import timedelta, timezone
 
 from dotenv import load_dotenv
 from flask_migrate import Migrate
@@ -19,6 +20,14 @@ app.config["SQLALCHEMY_ECHO"] = os.environ.get("SQLALCHEMY_ECHO") == "1"
 
 db.init_app(app)
 migrate = Migrate(app, db)
+
+PH_TIME = timezone(timedelta(hours=8))  # Philippine time has no daylight saving
+
+
+@app.template_filter("local")
+def local_time(value):
+    """Show a database time in Philippine time, e.g. Oct 26, 08:01 AM."""
+    return value.astimezone(PH_TIME).strftime("%b %d, %I:%M %p") if value else ""
 
 
 @app.get("/")
@@ -77,6 +86,7 @@ def join():
     flash("You joined the queue.", "success")
     return redirect(url_for("ticket", ticket_id=ticket.id))
 
+
 def people_ahead(t):
     """Count tickets still waiting that joined before t (one shared line)."""
     stmt = (db.select(func.count())
@@ -92,10 +102,12 @@ def ticket(ticket_id):
     return render_template("ticket.html", ticket=t, service=t.service,
                            ahead=people_ahead(t))
 
+
 @app.get("/queue/<int:ticket_id>/status.json")
 def ticket_status(ticket_id):
     t = db.get_or_404(Ticket, ticket_id)
     return {"status": t.status, "ahead": people_ahead(t)}
+
 
 @app.post("/queue/<int:ticket_id>/leave")
 def leave(ticket_id):
@@ -118,11 +130,12 @@ def staff_dashboard():
         stmt = stmt.where(Ticket.service_id == service_id)
     tickets = db.session.scalars(stmt).all()
 
-    # Shape each ticket the way staff.html expects (id, name, status, service_id)
+    # Shape each ticket the way staff.html expects
     queue = [{"id": t.id,
               "name": t.user.name,
               "status": t.status,
-              "service_id": t.service_id} for t in tickets]
+              "service_id": t.service_id,
+              "created_at": t.created_at} for t in tickets]
 
     all_services = db.session.scalars(db.select(Service).order_by(Service.id)).all()
     names = {s.id: s.name for s in all_services}
@@ -159,6 +172,7 @@ def staff_action(ticket_id, action):
     t["status"] = new_status
     flash(f"Ticket #{ticket_id} marked {new_status}.", "info")
     return redirect(url_for("staff_dashboard"))
+
 
 @app.cli.command("seed")
 def seed():

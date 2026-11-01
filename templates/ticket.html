@@ -2,7 +2,7 @@
 {% block title %}Ticket #{{ ticket.id }} · CashierQ{% endblock %}
 
 {% block content %}
-{% set badge = {'waiting': 'warning', 'called': 'success', 'served': 'secondary', 'no-show': 'danger'} %}
+{% set badge = {'waiting': 'warning', 'called': 'success', 'served': 'secondary', 'no-show': 'danger', 'left': 'secondary'} %}
 <div class="row justify-content-center">
   <div class="col-12 col-md-8 col-lg-5">
     <div class="card text-center shadow-sm">
@@ -10,6 +10,7 @@
         <h1 class="h6 text-body-secondary mb-0">Your ticket</h1>
         <p class="display-1 fw-bold my-2">#{{ ticket.id }}</p>
         <p class="mb-3"><span class="text-body-secondary">Service:</span> {{ service.name }}</p>
+        <p class="mb-3 small text-body-secondary">Joined {{ ticket.created_at|local }}</p>
 
         <div id="live-status" aria-live="polite">
           <p class="mb-1 small text-body-secondary">Status:</p>
@@ -44,7 +45,7 @@
 <script>
   const statusUrl = "{{ url_for('ticket_status', ticket_id=ticket.id) }}";
   const badgeColors = {
-    "waiting": "warning", "called": "success", "served": "secondary", "no-show": "danger"
+    "waiting": "warning", "called": "success", "served": "secondary", "no-show": "danger", "left": "secondary"
   };
 
   function aheadMessage(data) {

@@ -38,6 +38,7 @@
         <th scope="col">Name</th>
         <th scope="col">Status</th>
         <th scope="col">Service</th>
+        <th scope="col">Joined</th>
         <th scope="col">Actions</th>
       </tr>
     </thead>
@@ -51,6 +52,7 @@
                 aria-hidden="true"></span>{{ t.status|capitalize }}
         </td>
         <td>{{ names[t.service_id] }}</td>
+        <td>{{ t.created_at|local }}</td>
         <td>
           {% if t.status == 'called' %}
           <div class="d-flex flex-column flex-md-row justify-content-center gap-2">
