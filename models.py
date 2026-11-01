@@ -28,6 +28,9 @@ class User(db.Model):
 
     __table_args__ = (
         CheckConstraint("position('@' in email) > 1", name="ck_users_email"),
+        CheckConstraint(
+            "student_id ~ '^[0-9]{4}-[0-9]{4}$'", name="ck_users_student_id"
+        ),
     )
 
 
