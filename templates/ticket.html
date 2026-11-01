@@ -1,15 +1,16 @@
 {% extends "base.html" %}
-{% block title %}Ticket #{{ ticket.number }} · CashierQ{% endblock %}
+{% block title %}Ticket #{{ ticket.id }} · CashierQ{% endblock %}
 
 {% block content %}
-{% set badge = {'waiting': 'warning', 'called': 'success', 'served': 'secondary', 'no-show': 'danger'} %}
+{% set badge = {'waiting': 'warning', 'called': 'success', 'served': 'secondary', 'no-show': 'danger', 'left': 'secondary'} %}
 <div class="row justify-content-center">
   <div class="col-12 col-md-8 col-lg-5">
     <div class="card text-center shadow-sm">
       <div class="card-body p-4">
         <h1 class="h6 text-body-secondary mb-0">Your ticket</h1>
-        <p class="display-1 fw-bold my-2">#{{ ticket.number }}</p>
-        <p class="mb-3"><span class="text-body-secondary">Service:</span> {{ service.name }}</p>
+        <p class="display-1 fw-bold my-2">#{{ ticket.id }}</p>
+        <p class="mb-1"><span class="text-body-secondary">Service:</span> {{ service.name }}</p>
+        <p class="mb-3 small text-body-secondary">Joined {{ ticket.created_at|local }}</p>
 
         <div id="live-status" aria-live="polite">
           <p class="mb-1 small text-body-secondary">Status:</p>
@@ -28,8 +29,8 @@
           <p class="small text-body-secondary mt-1 mb-0">Updates automatically</p>
         </div>
 
-        {% if ticket.status in ('waiting', 'called') %}
-        <form method="post" action="{{ url_for('leave', ticket_id=ticket.number) }}" class="mt-4"
+        {% if ticket.status == 'waiting' %}
+        <form method="post" action="{{ url_for('leave', ticket_id=ticket.id) }}" class="mt-4"
               onsubmit="return confirm('Leave the queue? You will lose your place.');">
           <button type="submit" class="btn btn-danger btn-sm">Leave the queue</button>
         </form>
@@ -42,9 +43,10 @@
 
 {% block scripts %}
 <script>
-  const statusUrl = "{{ url_for('ticket_status', ticket_id=ticket.number) }}";
+  const statusUrl = "{{ url_for('ticket_status', ticket_id=ticket.id) }}";
   const badgeColors = {
-    "waiting": "warning", "called": "success", "served": "secondary", "no-show": "danger"
+    "waiting": "warning", "called": "success", "served": "secondary",
+    "no-show": "danger", "left": "secondary"
   };
 
   function aheadMessage(data) {

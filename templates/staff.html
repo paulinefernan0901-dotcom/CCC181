@@ -2,7 +2,7 @@
 {% block title %}Staff dashboard · CashierQ{% endblock %}
 
 {% block content %}
-<h1 class="h2 mb-3">Staff dashboard</h1>
+<p><a href="{{ url_for('services_list') }}" class="btn btn-outline-secondary btn-sm">Manage services</a></p>
 
 <div class="d-flex flex-wrap gap-2 mb-3">
   {% for s in services %}
@@ -38,33 +38,38 @@
         <th scope="col">Name</th>
         <th scope="col">Status</th>
         <th scope="col">Service</th>
+        <th scope="col">Joined</th>
         <th scope="col">Actions</th>
       </tr>
     </thead>
     <tbody>
       {% for t in queue %}
       <tr class="{% if t.status == 'called' %}table-success{% endif %}">
-        <th scope="row">#{{ t.number }}</th>
-        <td>{{ t.name }}</td>
+        <th scope="row">#{{ t.id }}</th>
+        <td>{{ t.user.name }}</td>
         <td class="text-nowrap">
           <span class="status-dot rounded-circle {% if t.status == 'called' %}bg-success{% else %}bg-warning{% endif %}"
                 aria-hidden="true"></span>{{ t.status|capitalize }}
         </td>
-        <td>{{ names[t.service_id] }}</td>
+        <td>{{ t.service.name }}</td>
+        <td class="text-nowrap">{{ t.created_at|local }}</td>
         <td>
-          {% if t.status == 'called' %}
-          <div class="d-flex flex-column flex-md-row justify-content-center gap-2">
-            <form method="post" action="/staff/tickets/{{ t.number }}/serve">
-              <button type="submit" class="btn btn-success" aria-label="Mark ticket {{ t.number }} as done">Done</button>
+          <div class="d-flex flex-wrap justify-content-center gap-2">
+            {% if t.status == 'called' %}
+            <form method="post" action="/staff/tickets/{{ t.id }}/serve">
+              <button type="submit" class="btn btn-success btn-sm" aria-label="Mark ticket {{ t.id }} as done">Done</button>
             </form>
-            <form method="post" action="/staff/tickets/{{ t.number }}/no-show"
-                  onsubmit="return confirm('Mark ticket #{{ t.number }} as no-show?');">
-              <button type="submit" class="btn btn-outline-danger" aria-label="Mark ticket {{ t.number }} as no-show">No-show</button>
+            <form method="post" action="/staff/tickets/{{ t.id }}/no-show"
+                  onsubmit="return confirm('Mark ticket #{{ t.id }} as no-show?');">
+              <button type="submit" class="btn btn-outline-danger btn-sm" aria-label="Mark ticket {{ t.id }} as no-show">No-show</button>
             </form>
+            {% else %}
+            <form method="post" action="/staff/tickets/{{ t.id }}/delete"
+                  onsubmit="return confirm('Delete ticket #{{ t.id }}? This cannot be undone.');">
+              <button type="submit" class="btn btn-outline-secondary btn-sm" aria-label="Delete ticket {{ t.id }}">Delete</button>
+            </form>
+            {% endif %}
           </div>
-          {% else %}
-          <span class="text-body-secondary">None</span>
-          {% endif %}
         </td>
       </tr>
       {% endfor %}
