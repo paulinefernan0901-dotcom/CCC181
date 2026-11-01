@@ -24,6 +24,7 @@ migrate = Migrate(app, db)
 
 PH_TIME = timezone(timedelta(hours=8))  # Philippine time has no daylight saving
 STUDENT_ID_RE = re.compile(r"^\d{4}-\d{4}$")
+EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
 @app.template_filter("local")
@@ -74,7 +75,7 @@ def join():
         errors["name"] = "Enter your name."
     if not STUDENT_ID_RE.match(student_id):
         errors["student_id"] = "Invalid ID format. Use YYYY-NNNN, for example 2023-1234."
-    if "@" not in email or len(email) > 120:
+    if not EMAIL_RE.match(email) or len(email) > 120:
         errors["email"] = "Enter a valid email address."
     if service is None or not service.is_active:
         errors["service_id"] = "Choose what you need at the cashier."
